@@ -59,45 +59,64 @@ class NotificationsPage extends StatelessWidget {
                             SnackBar(content: Text('Notification deleted.')),
                           );
                         },
-                        child: Card(
+                        child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: ListTile(
-                            leading: Icon(notification.iconData ?? Icons.info, color: notification.isRead ? Colors.grey : Colors.blue),
-                            title: Text(notification.title),
-                            subtitle: Text(
-                              '${notification.message} - ${notification.timestamp.toLocal().toString().split('.')[0]}',
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Card(
+                            elevation: 0, // Remove Card's default elevation
+                            margin: EdgeInsets.zero, // Reset Card's margin
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            trailing: notification.imageBytes != null
-                                ? const Icon(Icons.image)
-                                : null,
-                            onTap: () {
-                              notificationProvider.toggleReadStatus(notification.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(notification.isRead ? 'Marked as unread.' : 'Marked as read.')),
-                              );
-                              if (notification.imageBytes != null) {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text(notification.title),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(notification.message),
-                                        const SizedBox(height: 10),
-                                        Image.memory(notification.imageBytes!),
+                            child: ListTile(
+                              leading: Icon(notification.iconData ?? Icons.info, color: notification.isRead ? Colors.grey : Colors.blue),
+                              title: Text(notification.title),
+                              subtitle: Text(
+                                '${notification.message} - ${notification.timestamp.toLocal().toString().split('.')[0]}',
+                              ),
+                              trailing: notification.imageBytes != null
+                                  ? const Icon(Icons.image)
+                                  : null,
+                              onTap: () {
+                                notificationProvider.toggleReadStatus(notification.id);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(notification.isRead ? 'Marked as unread.' : 'Marked as read.')),
+                                );
+                                if (notification.imageBytes != null) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(notification.title),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(notification.message),
+                                          const SizedBox(height: 10),
+                                          Image.memory(notification.imageBytes!),
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          child: const Text('Close'),
+                                        ),
                                       ],
                                     ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Close'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            },
+                                  );
+                                }
+                              },
+                            ),
                           ),
                         ),
                       );

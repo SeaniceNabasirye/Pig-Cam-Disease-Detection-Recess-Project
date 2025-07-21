@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pigcam2/pages/camera_page.dart';
 import 'package:pigcam2/components/common_app_bar.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
@@ -27,9 +28,18 @@ class _WiFiSettingsPageState extends State<WiFiSettingsPage> {
         security: _passwordController.text.isEmpty ? NetworkSecurity.NONE : NetworkSecurity.WPA,
         joinOnce: true,
       );
-      setState(() {
-        _status = connected ? 'Connected to ${_ssidController.text}' : 'Failed to connect.';
-      });
+      if (!mounted) return;
+      
+      if (connected) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CameraPage()),
+        );
+      } else {
+        setState(() {
+          _status = 'Failed to connect.';
+        });
+      }
     } catch (e) {
       setState(() {
         _status = 'Error: $e';
