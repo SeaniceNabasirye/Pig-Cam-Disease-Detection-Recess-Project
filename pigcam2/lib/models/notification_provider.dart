@@ -10,6 +10,16 @@ class NotificationProvider extends ChangeNotifier {
   List<NotificationModel> get notifications => UnmodifiableListView(_notifications);
   int get unreadCount => _unreadCount;
 
+  // New list to store captured images for gallery
+  final List<Uint8List> _capturedImages = [];
+
+  List<Uint8List> get capturedImages => List.unmodifiable(_capturedImages);
+
+  // New list to store prediction history
+  final List<Map<String, dynamic>> _predictionHistory = [];
+
+  List<Map<String, dynamic>> get predictionHistory => List.unmodifiable(_predictionHistory);
+
   void addNotification(NotificationModel notification) {
     _notifications.insert(0, notification); // Add to the beginning so newest is first
     if (!notification.isRead) {
@@ -32,6 +42,14 @@ class NotificationProvider extends ChangeNotifier {
     addNotification(
       NotificationModel.imageCaptureNotification(imageBytes: imageBytes),
     );
+    // Also add to captured images list
+    _capturedImages.insert(0, imageBytes);
+    notifyListeners();
+  }
+
+  void addPredictionHistory(Map<String, dynamic> prediction) {
+    _predictionHistory.insert(0, prediction);
+    notifyListeners();
   }
 
   void deleteNotification(String notificationId) {

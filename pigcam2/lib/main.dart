@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pigcam2/pages/home_page.dart';
 import 'package:pigcam2/pages/camera_page.dart';
-import 'package:pigcam2/pages/chart_page.dart';
 import 'package:pigcam2/pages/settings_page.dart';
 import 'package:pigcam2/pages/notifications_page.dart'; // Import NotificationsPage
+import 'package:pigcam2/pages/video_gallery_page.dart'; // Import VideoGalleryPage
 import 'package:pigcam2/models/notification_provider.dart'; // Import NotificationProvider
 import 'package:animated_background/animated_background.dart';
 import 'package:provider/provider.dart'; // Import provider package
@@ -25,7 +25,8 @@ class MainScaffold extends StatefulWidget {
   State<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _MainScaffoldState extends State<MainScaffold> with SingleTickerProviderStateMixin {
+class _MainScaffoldState extends State<MainScaffold>
+    with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -38,7 +39,7 @@ class _MainScaffoldState extends State<MainScaffold> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const HomePage(),
-      const CameraPage(),
+      CameraPage(ipAddress: ''),
       SettingsPage(
         onThemeModeChanged: widget.onThemeModeChanged,
         onAnimationsToggled: widget.onAnimationsToggled,
@@ -48,20 +49,16 @@ class _MainScaffoldState extends State<MainScaffold> with SingleTickerProviderSt
     ];
 
     final Brightness brightness = Theme.of(context).brightness;
-    final Color particleColor = brightness == Brightness.light ? Colors.black.withOpacity(0.5) : Colors.white.withOpacity(0.5);
+    final Color particleColor = brightness == Brightness.light
+        ? Colors.black.withOpacity(0.5)
+        : Colors.white.withOpacity(0.5);
 
     Widget content = Scaffold(
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera),
-            label: 'Camera',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Camera'),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',
@@ -128,6 +125,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'PigCam2',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -135,9 +133,15 @@ class _MyAppState extends State<MyApp> {
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
         brightness: Brightness.dark,
+        scaffoldBackgroundColor: Color(0xFF2F2F2F), // gray-dark background
+        cardColor: Color(0xFF3F3F3F), // gray-dark card color
+        canvasColor: Color(0xFF3F3F3F), // gray-dark canvas color
       ),
       themeMode: _themeMode,
       initialRoute: '/',
@@ -148,7 +152,7 @@ class _MyAppState extends State<MyApp> {
           onThemeModeChanged: _setThemeMode,
           onAnimationsToggled: _toggleAnimations,
         ),
-        '/camera': (context) => const CameraPage(),
+        '/camera': (context) => CameraPage(ipAddress: ''),
         '/settings': (context) => SettingsPage(
           onThemeModeChanged: _setThemeMode,
           onAnimationsToggled: _toggleAnimations,
@@ -156,6 +160,7 @@ class _MyAppState extends State<MyApp> {
           initialAnimationsEnabled: _areAnimationsEnabled,
         ),
         '/notifications': (context) => const NotificationsPage(),
+        '/video_gallery': (context) => const VideoGalleryPage(),
       },
     );
   }

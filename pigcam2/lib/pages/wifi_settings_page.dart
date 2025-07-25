@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pigcam2/pages/camera_page.dart';
 import 'package:pigcam2/components/common_app_bar.dart';
+import 'package:pigcam2/pages/camera_page.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
 class WiFiSettingsPage extends StatefulWidget {
@@ -12,8 +12,13 @@ class WiFiSettingsPage extends StatefulWidget {
 
 class _WiFiSettingsPageState extends State<WiFiSettingsPage> {
   String _status = 'Not connected';
-  final TextEditingController _ssidController = TextEditingController(text: 'ESP32-CAM');
+  final TextEditingController _ssidController = TextEditingController(
+    text: 'ESP32-CAM',
+  );
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _ipController = TextEditingController(
+    text: 'http://192.168.4.1',
+  );
   bool _scanning = false;
   List<WifiNetwork> _wifiList = [];
 
@@ -24,16 +29,23 @@ class _WiFiSettingsPageState extends State<WiFiSettingsPage> {
     try {
       bool connected = await WiFiForIoTPlugin.connect(
         _ssidController.text,
-        password: _passwordController.text.isEmpty ? null : _passwordController.text,
-        security: _passwordController.text.isEmpty ? NetworkSecurity.NONE : NetworkSecurity.WPA,
+        password: _passwordController.text.isEmpty
+            ? null
+            : _passwordController.text,
+        security: _passwordController.text.isEmpty
+            ? NetworkSecurity.NONE
+            : NetworkSecurity.WPA,
         joinOnce: true,
       );
-      if (!mounted) return;
-      
       if (connected) {
+        setState(() {
+          _status = 'Connected to ${_ssidController.text}';
+        });
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const CameraPage()),
+          MaterialPageRoute(
+            builder: (context) => CameraPage(ipAddress: _ipController.text),
+          ),
         );
       } else {
         setState(() {
@@ -132,4 +144,4 @@ class _WiFiSettingsPageState extends State<WiFiSettingsPage> {
       ),
     );
   }
-} 
+}

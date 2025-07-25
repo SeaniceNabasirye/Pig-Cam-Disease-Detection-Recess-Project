@@ -43,6 +43,10 @@ dependencies:
   liquid_pull_to_refresh: ^3.0.0
   wifi_iot: ^0.3.18
   flutter_mjpeg: ^2.0.0
+  video_player: ^2.4.5
+  path_provider: ^2.0.11
+  webview_flutter: ^4.13.0
+  webview_flutter_web: ^0.2.3+4
 
 dev_dependencies:
   flutter_test:

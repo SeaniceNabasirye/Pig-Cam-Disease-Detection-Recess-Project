@@ -33,6 +33,16 @@ class _SettingsPageState extends State<SettingsPage> {
     _areAnimationsEnabled = widget.initialAnimationsEnabled;
   }
 
+  @override
+  void didUpdateWidget(covariant SettingsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialThemeMode != widget.initialThemeMode) {
+      setState(() {
+        _isDarkModeEnabled = widget.initialThemeMode == ThemeMode.dark;
+      });
+    }
+  }
+
   void _showFeedback(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
