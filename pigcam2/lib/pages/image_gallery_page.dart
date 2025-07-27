@@ -1,6 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:pigcam2/components/common_app_bar.dart';
+import 'package:pigcam2/widgets/platform_image_widget.dart';
+import 'dart:io';
+import 'dart:async';
 
 class ImageGalleryPage extends StatefulWidget {
   const ImageGalleryPage({Key? key}) : super(key: key);
@@ -62,7 +64,10 @@ class _ImageGalleryPageState extends State<ImageGalleryPage> {
                 return GestureDetector(
                   onTap: () => _viewImage(image),
                   onLongPress: () => _deleteImage(index),
-                  child: Image.file(image, fit: BoxFit.cover),
+                  child: PlatformImageWidget(
+                    imageFile: image,
+                    fit: BoxFit.cover,
+                  ),
                 );
               },
             ),
@@ -82,7 +87,10 @@ class ImageViewScreen extends StatelessWidget {
         title: const Text('View Image'),
       ),
       body: Center(
-        child: Image.file(imageFile),
+        child: PlatformImageWidget(
+          imageFile: imageFile,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

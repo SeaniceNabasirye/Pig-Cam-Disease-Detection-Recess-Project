@@ -24,10 +24,23 @@ android {
         applicationId = "com.example.pigcam2"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 21 // Required for TensorFlow Lite
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Enable TensorFlow Lite GPU acceleration
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
+        
+        // Enable TensorFlow Lite optimizations
+        externalNativeBuild {
+            cmake {
+                cppFlags("-std=c++14")
+                arguments("-DANDROID_STL=c++_shared")
+            }
+        }
     }
 
     buildTypes {
@@ -36,6 +49,16 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+    
+    // Enable TensorFlow Lite optimizations
+    aaptOptions {
+        noCompress += listOf("tflite")
+    }
+    
+    // Add TensorFlow Lite dependencies
+    packagingOptions {
+        pickFirsts += listOf("**/libc++_shared.so", "**/libtensorflowlite_jni.so")
     }
 }
 

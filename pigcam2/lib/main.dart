@@ -4,7 +4,9 @@ import 'package:pigcam2/pages/camera_page.dart';
 import 'package:pigcam2/pages/settings_page.dart';
 import 'package:pigcam2/pages/notifications_page.dart'; // Import NotificationsPage
 import 'package:pigcam2/pages/video_gallery_page.dart'; // Import VideoGalleryPage
+import 'package:pigcam2/pages/prediction_history_page.dart'; // Import PredictionHistoryPage
 import 'package:pigcam2/models/notification_provider.dart'; // Import NotificationProvider
+import 'package:pigcam2/models/classification_history.dart'; // Import ClassificationHistoryProvider
 import 'package:animated_background/animated_background.dart';
 import 'package:provider/provider.dart'; // Import provider package
 
@@ -161,6 +163,7 @@ class _MyAppState extends State<MyApp> {
         ),
         '/notifications': (context) => const NotificationsPage(),
         '/video_gallery': (context) => const VideoGalleryPage(),
+        '/prediction_history': (context) => const PredictionHistoryPage(),
       },
     );
   }
@@ -168,8 +171,11 @@ class _MyAppState extends State<MyApp> {
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => NotificationProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => NotificationProvider()),
+        ChangeNotifierProvider(create: (context) => ClassificationHistoryProvider()),
+      ],
       child: const MyApp(),
     ),
   );

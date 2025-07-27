@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart'; // For list extensions like firstWhereOrNull
 import './notification_model.dart';
+import 'package:pigcam2/services/image_classification_service.dart';
 import 'dart:typed_data';
 
 class NotificationProvider extends ChangeNotifier {
@@ -44,6 +45,26 @@ class NotificationProvider extends ChangeNotifier {
     );
     // Also add to captured images list
     _capturedImages.insert(0, imageBytes);
+    notifyListeners();
+  }
+
+  // Method to add classification notification
+  void addClassificationNotification({
+    required List<ClassificationResult> results,
+    required String source,
+    Uint8List? imageBytes,
+    String? customTitle,
+    String? customMessage,
+  }) {
+    addNotification(
+      NotificationModel.classificationNotification(
+        results: results,
+        source: source,
+        imageBytes: imageBytes,
+        customTitle: customTitle,
+        customMessage: customMessage,
+      ),
+    );
     notifyListeners();
   }
 

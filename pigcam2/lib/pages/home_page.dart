@@ -5,6 +5,7 @@ import 'package:marquee/marquee.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:pigcam2/models/notification_provider.dart';
+import 'package:pigcam2/models/notification_model.dart'; // Added import for NotificationModel
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -58,6 +59,87 @@ class _HomePageState extends State<HomePage> {
   Future<void> _handleRefresh() async {
     await Future.delayed(const Duration(seconds: 1));
     setState(() {}); // For demo, just rebuild
+  }
+
+  Widget _buildClassificationNotificationCard(NotificationModel notification) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      elevation: 2,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: notification.notificationColor.withOpacity(0.3),
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: notification.notificationColor.withOpacity(0.1),
+            child: Icon(
+              notification.notificationIcon,
+              color: notification.notificationColor,
+            ),
+          ),
+          title: Text(
+            notification.title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: notification.notificationColor,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(notification.message),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.source, size: 12, color: Colors.grey),
+                  SizedBox(width: 4),
+                  Text(
+                    'Source: ${notification.source ?? 'Unknown'}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+              Text(
+                '${notification.timestamp.toLocal().toString().split('.')[0]}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          trailing: notification.classificationResults != null
+              ? Chip(
+                  label: Text('${notification.classificationResults!.length} results'),
+                  backgroundColor: notification.notificationColor.withOpacity(0.1),
+                  labelStyle: TextStyle(color: notification.notificationColor),
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationCard(NotificationModel notification) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      child: ListTile(
+        leading: Icon(notification.notificationIcon, color: Colors.grey),
+        title: Text(notification.title),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(notification.message),
+            const SizedBox(height: 4),
+            Text(
+              '${notification.timestamp.toLocal().toString().split('.')[0]}',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -169,48 +251,53 @@ class _HomePageState extends State<HomePage> {
           // Most recent notifications
           Consumer<NotificationProvider>(
             builder: (context, notificationProvider, child) {
-              final notifications = notificationProvider.notifications.take(3).toList();
+              final notifications = notificationProvider.notifications.take(5).toList();
               if (notifications.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: Text('No recent notifications.'),
                 );
               }
+              
+              // Separate classification notifications from others
+              final classificationNotifications = notifications.where((n) => n.classificationResults != null).toList();
+              final otherNotifications = notifications.where((n) => n.classificationResults == null).toList();
+              
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8.0),
-                    child: Text(
-                      'Recent Notifications',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  // Classification notifications (show first if any)
+                  if (classificationNotifications.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0, left: 16.0),
+                      child: Text(
+                        '🔍 Recent Classifications',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+                      ),
                     ),
-                  ),
-                  ...notifications.map((n) => Card(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: ListTile(
-                          leading: Icon(n.iconData ?? Icons.notifications),
-                          title: Text(n.title),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(n.message),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${n.timestamp.toLocal().toString().split('.')[0]}',
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )),
+                    ...classificationNotifications.map((n) => _buildClassificationNotificationCard(n)),
+                    const SizedBox(height: 16),
+                  ],
+                  
+                  // Other notifications
+                  if (otherNotifications.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0, left: 16.0),
+                      child: Text(
+                        '📢 Other Notifications',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    ...otherNotifications.map((n) => _buildNotificationCard(n)),
+                  ],
+                  
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/notifications');
                       },
-                      child: const Text('View All'),
+                      child: const Text('View All Notifications'),
                     ),
                   ),
                 ],

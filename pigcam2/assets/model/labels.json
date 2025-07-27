@@ -1,0 +1,127 @@
+{
+  "model_info": {
+    "architecture": "MobileNetV2",
+    "input_size": [224, 224],
+    "num_classes": 6,
+    "model_formats": ["h5", "tflite"]
+  },
+  "classes": [
+    {
+      "id": 0,
+      "name": "Healthy",
+      "display_name": "Healthy",
+      "description": "Pigs showing normal, healthy appearance",
+      "visual_indicators": [
+        "Normal skin color",
+        "No visible lesions",
+        "Healthy coat",
+        "Normal behavior"
+      ],
+      "severity": "None",
+      "requires_action": false,
+      "confidence_threshold": 0.7
+    },
+    {
+      "id": 1,
+      "name": "abnormal_secretion",
+      "display_name": "Abnormal Secretion",
+      "description": "Unusual discharge or secretion from various body parts",
+      "visual_indicators": [
+        "Discharge from eyes",
+        "Discharge from nose",
+        "Discharge from ears",
+        "Other orifice discharge"
+      ],
+      "common_causes": [
+        "Respiratory infections",
+        "Ear infections",
+        "Eye problems"
+      ],
+      "severity": "Moderate to High",
+      "requires_action": true,
+      "confidence_threshold": 0.7
+    },
+    {
+      "id": 2,
+      "name": "skin_changes",
+      "display_name": "Skin Changes",
+      "description": "Visible alterations in skin appearance and condition",
+      "visual_indicators": [
+        "Rashes",
+        "Redness",
+        "Lesions",
+        "Scabs",
+        "Hair loss",
+        "Discoloration"
+      ],
+      "common_causes": [
+        "Parasites",
+        "Fungal infections",
+        "Bacterial infections",
+        "Allergies"
+      ],
+      "severity": "Variable",
+      "requires_action": true,
+      "confidence_threshold": 0.7
+    },
+    {
+      "id": 3,
+      "name": "hernia",
+      "display_name": "Hernia",
+      "description": "Protrusion of internal organs through weakened abdominal wall",
+      "visual_indicators": [
+        "Visible bulge in abdominal area",
+        "Swelling in abdominal area"
+      ],
+      "common_types": [
+        "Umbilical hernia",
+        "Inguinal hernia"
+      ],
+      "severity": "High",
+      "requires_action": true,
+      "confidence_threshold": 0.7
+    },
+    {
+      "id": 4,
+      "name": "cancer",
+      "display_name": "Cancer",
+      "description": "Malignant growths or tumors on pig's body",
+      "visual_indicators": [
+        "Unusual lumps",
+        "Growths",
+        "Masses"
+      ],
+      "common_locations": [
+        "Skin",
+        "Mammary glands",
+        "Internal organs"
+      ],
+      "severity": "Very High",
+      "requires_action": true,
+      "confidence_threshold": 0.7
+    },
+    {
+      "id": 5,
+      "name": "skin_changes_alt",
+      "display_name": "Skin Changes Alternative",
+      "description": "Alternative classification for skin-related conditions",
+      "visual_indicators": [
+        "Similar to skin_changes but may include different manifestations"
+      ],
+      "common_causes": [
+        "Environmental factors",
+        "Nutritional deficiencies",
+        "Stress"
+      ],
+      "severity": "Variable",
+      "requires_action": true,
+      "confidence_threshold": 0.7
+    }
+  ],
+  "usage_notes": {
+    "confidence_range": [0.0, 1.0],
+    "default_threshold": 0.7,
+    "case_sensitive": true,
+    "label_matching": "exact"
+  }
+} 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
+import 'package:pigcam2/services/image_classification_service.dart';
 
 class NotificationModel {
   final String id;
@@ -7,6 +8,8 @@ class NotificationModel {
   final String message;
   final DateTime timestamp;
   final Uint8List? imageBytes;
+  final List<ClassificationResult>? classificationResults;
+  final String? source;
   bool isRead;
 
   NotificationModel({
@@ -15,6 +18,8 @@ class NotificationModel {
     required this.message,
     required this.timestamp,
     this.imageBytes,
+    this.classificationResults,
+    this.source,
     this.isRead = false,
   });
 
@@ -33,5 +38,74 @@ class NotificationModel {
       timestamp: DateTime.now(),
       imageBytes: imageBytes,
     );
+  }
+
+  // Method to create a notification for classification results
+  static NotificationModel classificationNotification({
+    required List<ClassificationResult> results,
+    required String source,
+    Uint8List? imageBytes,
+    String? customTitle,
+    String? customMessage,
+  }) {
+    final hasHighSeverity = results.any((r) => 
+      r.severity == 'High' || r.severity == 'Very High');
+    
+    final requiresAction = results.any((r) => r.requiresAction);
+    
+    String title = customTitle ?? 'Classification Complete';
+    String message = customMessage ?? 'Analysis completed for $source image';
+    
+    if (hasHighSeverity) {
+      title = '⚠️ High Severity Detected';
+      message = 'Critical conditions found in $source image';
+    } else if (requiresAction) {
+      title = '🔍 Action Required';
+      message = 'Conditions requiring attention found in $source image';
+    }
+
+    return NotificationModel(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: title,
+      message: message,
+      timestamp: DateTime.now(),
+      imageBytes: imageBytes,
+      classificationResults: results,
+      source: source,
+    );
+  }
+
+  // Get notification icon based on content
+  IconData get notificationIcon {
+    if (classificationResults != null) {
+      final hasHighSeverity = classificationResults!.any((r) => 
+        r.severity == 'High' || r.severity == 'Very High');
+      
+      if (hasHighSeverity) {
+        return Icons.warning;
+      } else if (classificationResults!.any((r) => r.requiresAction)) {
+        return Icons.info;
+      } else {
+        return Icons.check_circle;
+      }
+    }
+    return Icons.notifications;
+  }
+
+  // Get notification color based on content
+  Color get notificationColor {
+    if (classificationResults != null) {
+      final hasHighSeverity = classificationResults!.any((r) => 
+        r.severity == 'High' || r.severity == 'Very High');
+      
+      if (hasHighSeverity) {
+        return Colors.red;
+      } else if (classificationResults!.any((r) => r.requiresAction)) {
+        return Colors.orange;
+      } else {
+        return Colors.green;
+      }
+    }
+    return Colors.blue;
   }
 } 
