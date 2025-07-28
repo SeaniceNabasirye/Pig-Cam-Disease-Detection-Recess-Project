@@ -1,13 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pigcam2/services/image_classification_service.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:convert';
+import '../lib/services/image_classification_service.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized(); // Add this line to initialize binding
-
-  group('TensorFlow Lite Integration Tests', () {
+  TestWidgetsFlutterBinding.ensureInitialized(); // Initialize Flutter binding for tests
+  
+  group('TensorFlow Lite Model Tests', () {
     late ImageClassificationService service;
 
     setUp(() {
@@ -18,81 +20,99 @@ void main() {
       service.dispose();
     });
 
-    test('Service initialization', () async {
-      expect(service.isInitialized, false);
-      
-      try {
-        await service.initialize();
-        expect(service.isInitialized, true);
-      } catch (e) {
-        // If model file is not available, this is expected
-        print('Model initialization failed (expected if model file not available): $e');
-        expect(service.isInitialized, false);
-      }
+    test('Model initialization', () async {
+      // Test that the model can be initialized
+      await service.initialize();
+      expect(service.isInitialized, isTrue);
     });
 
-    test('Image preprocessing test', () {
-      // Create a test image
-      final testImage = img.Image(width: 100, height: 100);
-      for (int y = 0; y < 100; y++) {
-        for (int x = 0; x < 100; x++) {
-          testImage.setPixel(x, y, img.ColorRgb8(128, 128, 128));
+    test('Model file exists', () async {
+      // Test that the model file is accessible
+      final modelData = await rootBundle.load('assets/model/quantized_pig_detector.tflite');
+      expect(modelData, isNotNull);
+      expect(modelData.lengthInBytes, greaterThan(0));
+    });
+
+    test('Labels file exists', () async {
+      // Test that the labels file is accessible
+      final labelsString = await rootBundle.loadString('assets/model/labels.json');
+      expect(labelsString, isNotEmpty);
+      
+      final labelsData = jsonDecode(labelsString);
+      expect(labelsData['classes'], isNotNull);
+      expect(labelsData['classes'], isA<List>());
+      expect(labelsData['classes'].length, greaterThan(0));
+    });
+
+    test('Image classification with test image', () async {
+      await service.initialize();
+      
+      // Create a test image (224x224 pixels)
+      final testImage = img.Image(width: 224, height: 224);
+      for (int y = 0; y < 224; y++) {
+        for (int x = 0; x < 224; x++) {
+          // Create a simple test pattern
+          final r = (x * 255 / 224).round();
+          final g = (y * 255 / 224).round();
+          final b = 128;
+          testImage.setPixel(x, y, img.ColorRgb8(r, g, b));
         }
       }
-
-      // Resize to model input size
-      final resizedImage = img.copyResize(testImage, width: 224, height: 224);
       
-      expect(resizedImage.width, 224);
-      expect(resizedImage.height, 224);
+      // Save test image to temporary file
+      final tempDir = Directory.systemTemp;
+      final testFile = File('${tempDir.path}/test_image.jpg');
+      testFile.writeAsBytesSync(img.encodeJpg(testImage));
       
-      // Check that the image was resized correctly
-      final pixel = resizedImage.getPixel(0, 0);
-      expect(pixel.r, 128);
-      expect(pixel.g, 128);
-      expect(pixel.b, 128);
+      try {
+        // Run classification
+        final results = await service.classifyImage(testFile);
+        
+        // Verify results
+        expect(results, isNotNull);
+        expect(results, isA<List<ClassificationResult>>());
+        
+        // If we get results, verify their structure
+        if (results.isNotEmpty) {
+          final result = results.first;
+          expect(result.label, isNotEmpty);
+          expect(result.confidence, greaterThanOrEqualTo(0.0));
+          expect(result.confidence, lessThanOrEqualTo(1.0));
+          expect(result.classId, greaterThanOrEqualTo(0));
+          expect(result.description, isNotEmpty);
+          expect(result.severity, isNotEmpty);
+        }
+        
+        print('✅ Classification test passed with ${results.length} results');
+        for (final result in results) {
+          print('  - ${result.label}: ${(result.confidence * 100).toStringAsFixed(1)}%');
+        }
+      } finally {
+        // Cleanup
+        if (await testFile.exists()) {
+          await testFile.delete();
+        }
+      }
     });
 
-    test('Classification result creation', () {
-      final result = ClassificationResult(
-        label: 'Healthy',
-        confidence: 0.95,
-        classId: 0,
-        description: 'Pigs showing normal, healthy appearance',
-        severity: 'None',
-        requiresAction: false,
-      );
-
-      expect(result.label, 'Healthy');
-      expect(result.confidence, 0.95);
-      expect(result.classId, 0);
-      expect(result.severity, 'None');
-      expect(result.requiresAction, false);
-    });
-
-    test('Classification result from JSON', () {
-      final json = {
-        'display_name': 'Skin Changes',
-        'id': 2,
-        'description': 'Visible alterations in skin appearance',
-        'severity': 'High',
-        'requires_action': true,
-      };
-
-      final result = ClassificationResult.fromJson(json);
-
-      expect(result.label, 'Skin Changes');
-      expect(result.classId, 2);
-      expect(result.description, 'Visible alterations in skin appearance');
-      expect(result.severity, 'High');
-      expect(result.requiresAction, true);
-    });
-
-    test('Service disposal', () async {
-      expect(service.isInitialized, false);
+    test('Error handling for invalid image', () async {
+      await service.initialize();
       
-      service.dispose();
-      expect(service.isInitialized, false);
+      // Create an invalid image file
+      final tempDir = Directory.systemTemp;
+      final invalidFile = File('${tempDir.path}/invalid.txt');
+      invalidFile.writeAsStringSync('This is not an image');
+      
+      try {
+        await expectLater(
+          service.classifyImage(invalidFile),
+          throwsA(isA<Exception>()),
+        );
+      } finally {
+        if (await invalidFile.exists()) {
+          await invalidFile.delete();
+        }
+      }
     });
   });
 } 

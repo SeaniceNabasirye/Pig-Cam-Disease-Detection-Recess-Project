@@ -38,35 +38,61 @@ class ImageClassificationService {
   static const String _modelPath = 'assets/model/quantized_pig_detector.tflite';
   static const String _labelsPath = 'assets/model/labels.json';
   
+  // Try TensorFlow Lite first, fallback to enhanced analysis
+  dynamic _interpreter;
   Map<String, dynamic>? _labelsData;
   List<ClassificationResult>? _classLabels;
   final Random _random = Random();
+  bool _useTensorFlowLite = false;
   
   bool get isInitialized => _labelsData != null;
 
   Future<void> initialize() async {
     try {
-      // Load labels
+      // Load labels first
       final labelsString = await rootBundle.loadString(_labelsPath);
       _labelsData = json.decode(labelsString);
       
       // Parse class labels
       _classLabels = _parseClassLabels();
       
-      print('✅ Image classification service initialized successfully');
-      print('📊 Model loaded with ${_classLabels!.length} classes');
-      print('🔧 Using enhanced fallback mode with image analysis');
-      
-      // Check if TensorFlow Lite model file exists
+      // Try to load TensorFlow Lite model
       try {
-        await rootBundle.load(_modelPath);
-        print('📁 TensorFlow Lite model file found');
+        // Import TensorFlow Lite dynamically to avoid issues on platforms where it's not supported
+        final tfliteFlutter = await _loadTensorFlowLite();
+        if (tfliteFlutter != null) {
+          _interpreter = await tfliteFlutter['Interpreter'].fromAsset(_modelPath);
+          _useTensorFlowLite = true;
+          print('✅ TensorFlow Lite model initialized successfully');
+          print('📊 Model loaded with ${_classLabels!.length} classes');
+          print('🔧 Using actual trained model for classification');
+        } else {
+          throw Exception('TensorFlow Lite not available');
+        }
       } catch (e) {
-        print('⚠️ TensorFlow Lite model file not accessible: $e');
+        print('⚠️ TensorFlow Lite model not available: $e');
+        print('🔧 Falling back to enhanced image analysis mode');
+        _useTensorFlowLite = false;
+      }
+      
+      if (!_useTensorFlowLite) {
+        print('✅ Enhanced fallback mode initialized successfully');
+        print('📊 Model loaded with ${_classLabels!.length} classes');
+        print('🔧 Using enhanced image analysis for classification');
       }
     } catch (e) {
       print('❌ Failed to initialize image classification service: $e');
       rethrow;
+    }
+  }
+
+  Future<dynamic> _loadTensorFlowLite() async {
+    try {
+      // Try to load TensorFlow Lite dynamically
+      // This will fail gracefully on platforms where it's not supported
+      return null; // For now, return null to use fallback mode
+    } catch (e) {
+      return null;
     }
   }
 
@@ -105,11 +131,21 @@ class ImageClassificationService {
         throw Exception('Failed to decode image');
       }
 
-      return _classifyWithEnhancedAnalysis(image);
+      if (_useTensorFlowLite && _interpreter != null) {
+        return _classifyWithTensorFlowLite(image);
+      } else {
+        return _classifyWithEnhancedAnalysis(image);
+      }
     } catch (e) {
       print('❌ Error during image classification: $e');
       rethrow;
     }
+  }
+
+  List<ClassificationResult> _classifyWithTensorFlowLite(img.Image image) {
+    // This would contain the actual TensorFlow Lite implementation
+    // For now, we'll use the enhanced analysis as fallback
+    return _classifyWithEnhancedAnalysis(image);
   }
 
   List<ClassificationResult> _classifyWithEnhancedAnalysis(img.Image image) {
@@ -244,6 +280,14 @@ class ImageClassificationService {
   }
 
   void dispose() {
+    if (_interpreter != null && _useTensorFlowLite) {
+      try {
+        _interpreter.close();
+      } catch (e) {
+        print('Warning: Error closing TensorFlow Lite interpreter: $e');
+      }
+    }
+    _interpreter = null;
     _labelsData = null;
     _classLabels = null;
   }

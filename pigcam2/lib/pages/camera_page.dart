@@ -313,10 +313,8 @@ class _CameraPageState extends State<CameraPage> {
           // Action Buttons
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
                   onPressed: _isClassifying ? null : _toggleCamera,
@@ -348,7 +346,7 @@ class _CameraPageState extends State<CameraPage> {
                 ElevatedButton.icon(
                   onPressed: _isClassifying ? null : _classifyStreamFrame,
                   icon: Icon(Icons.analytics),
-                  label: Text('Stream'),
+                  label: Text('Classify Stream'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     foregroundColor: Colors.white,
@@ -357,7 +355,7 @@ class _CameraPageState extends State<CameraPage> {
                 ElevatedButton.icon(
                   onPressed: (_capturedImage != null && !_isClassifying) ? _classifyCurrentImage : null,
                   icon: Icon(Icons.analytics),
-                  label: Text('Classify'),
+                  label: Text('Classify Gallery'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
                     foregroundColor: Colors.white,
