@@ -129,38 +129,35 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
             const SizedBox(height: 25), // Space below horizontal carousel
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Column(
             children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.camera_alt, color: Colors.blue),
-                label: const Text('Camera'),
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/camera');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  elevation: 4,
-                  side: const BorderSide(color: Colors.blue),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.camera_alt, color: Colors.blue),
+                  title: Text('Camera'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.pushReplacementNamed(context, '/camera');
+                  },
                 ),
               ),
-              const SizedBox(width: 20),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.settings, color: Colors.blue),
-                label: const Text('Settings'),
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/settings');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  elevation: 4,
-                  side: const BorderSide(color: Colors.blue),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+              SizedBox(height: 16),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.settings, color: Colors.blue),
+                  title: Text('Settings'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.pushReplacementNamed(context, '/settings');
+                  },
                 ),
               ),
             ],
