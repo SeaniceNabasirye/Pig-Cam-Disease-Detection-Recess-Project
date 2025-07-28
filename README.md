@@ -62,9 +62,10 @@ THESE FILES LABELLED BELOW ARE IN THE SICK-PIG-DATABASE(WHICH IS THE PRE-TRAINED
 
 NOTE:
 
--To download Tensorflow, your python version must be between 3.8 - 3.12
-
 -It also needs you to install CONDA(ANACONDA PROMPT) and create a virtual environment
+
+-To install Tensorflow, your python version must be between 3.8 - 3.12
+
 
 ### 1. Clone the Repository
 ```bash (TERMINAL)
